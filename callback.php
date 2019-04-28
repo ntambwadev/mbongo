@@ -72,7 +72,7 @@
 	  // Execute any logic that should take place if the save fails.
 	  // error is a ParseException object with an error code and message.
 	  echo 'Failed to create new Payment, with error message: ' . $ex->getMessage();
-	  error_log('MBGONGO: Failed to create new object, with error message:' . $ex->getMessage());
+	  error_log('MBGONGO: Failed to create new Payment, with error message:' . $ex->getMessage());
 	}
 
 	

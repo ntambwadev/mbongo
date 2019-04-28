@@ -33,6 +33,29 @@
 
 	require 'vendor/autoload.php';
 
+	// Setup Parse server
+
+	use Parse\ParseObject;
+	use Parse\ParseQuery;
+	use Parse\ParseACL;
+	use Parse\ParsePush;
+	use Parse\ParseUser;
+	use Parse\ParseInstallation;
+	use Parse\ParseException;
+	use Parse\ParseFile;
+	use Parse\ParseClient;
+	use Parse\ParseGeoPoint;
+
+	$master_key = "yPc6M834wK7qwaJsMHY8lTx97RhNX2kZeIxhfm4W";
+	$app_id = "5QUa5y0lcxNstWnw7onLUaBGHL2uIKW4YzTO2TEJ";
+	$rest_key = "hwkUY2rYjfzbeLOVChaBaN42dHF3lxJcnhEyLf9v";
+	$server = "https://parseapi.back4app.com";
+	$path = "/";
+
+	ParseClient::initialize($app_id, $rest_key, $master_key);  
+	ParseClient::setServerURL($server, $path);
+
+
 	$merchant_secret = 'sk_test_p7Aq1TW4oKqJD6zIodsWSoCW2fFOZoNlfNqJM0CuBbLe';  
 			
 	// Create and initialize variables to be sent to confirm the that the ongoing transaction is associated with the current merchant
@@ -104,26 +127,6 @@
 
 // GET TRANSACTION FROM PARSE DB 
 
-	use Parse\ParseObject;
-	use Parse\ParseQuery;
-	use Parse\ParseACL;
-	use Parse\ParsePush;
-	use Parse\ParseUser;
-	use Parse\ParseInstallation;
-	use Parse\ParseException;
-	use Parse\ParseFile;
-	use Parse\ParseClient;
-	use Parse\ParseGeoPoint;
-
-	$master_key = "yPc6M834wK7qwaJsMHY8lTx97RhNX2kZeIxhfm4W";
-	$app_id = "5QUa5y0lcxNstWnw7onLUaBGHL2uIKW4YzTO2TEJ";
-	$rest_key = "hwkUY2rYjfzbeLOVChaBaN42dHF3lxJcnhEyLf9v";
-	$server = "https://parseapi.back4app.com";
-	$path = "/";
-
-	ParseClient::initialize($app_id, $rest_key, $master_key);  
-	ParseClient::setServerURL($server, $path);
-
 	try {
 		file_put_contents("php://stderr", "MBGONGO: Trying fetch PAYMENT in PARSE with transaction_uid: " . $received_transaction_uid." \n");
 
@@ -136,6 +139,7 @@
 
 		$database_transaction_uid = '';//************* LOAD FROM YOUR DATABASE ****************
 		$database_transaction_token = '';//************* LOAD FROM YOUR DATABASE ****************
+		$payment = new ParseObject("Payment");
 
 		// Do something with the returned ParseObject values
 		for ($i = 0; $i < count($results); $i++) {
@@ -143,6 +147,8 @@
 
 		  $database_transaction_uid = $object->get('transaction_uid');
 		  $database_transaction_token = $object->get('transaction_token');
+
+		  $payment = $object;
 
 		  echo $object->getObjectId() . ' - ' . $object->get('transaction_uid');
 		  error_log("MBONGO: Successfully retrieved payment with transaction_uid: " . $object->get('transaction_uid') . " from Parse.");
@@ -184,14 +190,14 @@
 			
 			if($received_transaction_status =="PAID"){
 				//Save the transaction status in your database and do whatever you want to tell the user that it's transaction succeed
-				echo '<br><br> transaction_status : '.$transaction_status;
-				error_log('MBONGO: WECASHUP transaction_status: ' . $transaction_status);
+				echo '<br><br> transaction_status : '.$received_transaction_status;
+				error_log('MBONGO: WECASHUP transaction_status: ' . $received_transaction_status);
 				
 			}else{ //Status = FAILED
 				
 				//Save the transaction status in your database and do whatever you want to tell the user that it's transaction failed
-				echo '<br><br> transaction_status : '.$transaction_status;
-				error_log('MBONGO: WECASHUP transaction_status: ' . $transaction_status);
+				echo '<br><br> transaction_status : '.$received_transaction_status;
+				error_log('MBONGO: WECASHUP transaction_status: ' . $received_transaction_status);
 			}
 			
 			/***** SAVE THIS IN YOUD DATABASE - start ****************/
@@ -207,6 +213,27 @@
 			$myfile = fopen("newfile.txt", "w") or die("Unable to open file!");
 			fwrite($myfile, $txt);
 			fclose($myfile);
+
+
+			// Update transaction in Parse with Status
+			$payment->set("transaction_status", $received_transaction_status);
+			$payment->set("transaction_amount", $received_transaction_amount);
+			$payment->set("transaction_details", $received_transaction_details);
+			$payment->set("transaction_type", $received_transaction_type);
+			
+
+			try {
+			  file_put_contents("php://stderr", "MBGONGO: Trying to Update PAYMENT in PARSE \n");
+			  $payment->save();
+			  echo 'New object created with objectId: ' . $payment->getObjectId();
+			  file_put_contents("php://stderr", "MBGONGO: Payment with objectId: " . $payment->getObjectId()." was updated \n");
+			} catch (ParseException $ex) {  
+			  // Execute any logic that should take place if the save fails.
+			  // error is a ParseException object with an error code and message.
+			  echo 'Failed to create new Payment, with error message: ' . $ex->getMessage();
+			  error_log('MBGONGO: Failed to create update payment, with error message:' . $ex->getMessage());
+			}
+
 			/***** SAVE THIS IN YOUD DATABASE - end ****************/
 				
 				/*
