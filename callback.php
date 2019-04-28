@@ -31,6 +31,7 @@
 	/* Provide a table with at least 5 columns in your database capturing the following
 	/  transaction_uid | transaction_confirmation_code| transaction_token| transaction_provider_name | transaction_status */
 	
+	use Parse\ParseObject;
 	use Parse\ParseQuery;
 	use Parse\ParseACL;
 	use Parse\ParsePush;
