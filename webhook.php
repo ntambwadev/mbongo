@@ -125,12 +125,14 @@
 	ParseClient::setServerURL($server, $path);
 
 	try {
+		file_put_contents("php://stderr", "MBGONGO: Trying fetch PAYMENT in PARSE with transaction_uid: " . $received_transaction_uid." \n");
+
 		$query = new ParseQuery("Payment");
 		$query->equalTo("transaction_uid", $received_transaction_uid);
 		$results = $query->find();
-
-		error_log("Successfully retrieved " . count($results) . " Payments from Parse.");
+		
 		echo "Successfully retrieved " . count($results) . " Payments.";
+		error_log("MBONGO: Successfully retrieved " . count($results) . " Payments from Parse.");
 
 		$database_transaction_uid = '';//************* LOAD FROM YOUR DATABASE ****************
 		$database_transaction_token = '';//************* LOAD FROM YOUR DATABASE ****************
@@ -143,7 +145,7 @@
 		  $database_transaction_token = $object->get('transaction_token');
 
 		  echo $object->getObjectId() . ' - ' . $object->get('transaction_uid');
-		  error_log("Successfully retrieved payment with transaction_uid" . $object->get('transaction_uid') . " from Parse.");
+		  error_log("MBONGO: Successfully retrieved payment with transaction_uid" . $object->get('transaction_uid') . " from Parse.");
 		}
 
 		//Authentication |We make sure that the received data come from a system that knows our secret key (WeCashUp only)
@@ -174,7 +176,7 @@
 		}
 
 		echo '<br><br>authenticated : '.$authenticated;
-		error_log("authenticated " . $authenticated);
+		error_log("MBONGO: authenticated " . $authenticated);
 			
 		if($authenticated == 'true'){
 			
@@ -183,13 +185,13 @@
 			if($received_transaction_status =="PAID"){
 				//Save the transaction status in your database and do whatever you want to tell the user that it's transaction succeed
 				echo '<br><br> transaction_status : '.$transaction_status;
-				error_log('WECASHUP transaction_status: ' .$transaction_status);
+				error_log('MBONGO: WECASHUP transaction_status: ' .$transaction_status);
 				
 			}else{ //Status = FAILED
 				
 				//Save the transaction status in your database and do whatever you want to tell the user that it's transaction failed
 				echo '<br><br> transaction_status : '.$transaction_status;
-				error_log('WECASHUP transaction_status: ' .$transaction_status);
+				error_log('MBONGO: WECASHUP transaction_status: ' .$transaction_status);
 			}
 			
 			/***** SAVE THIS IN YOUD DATABASE - start ****************/
@@ -225,6 +227,7 @@
 
 		} catch (\Exception $e){
 			echo $e->getMessage();
+			error_log('MBONGO: Failed to create fetch Payment, with error message:' . $ex->getMessage());
 		}
 		
 ?>
