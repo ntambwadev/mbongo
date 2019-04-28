@@ -46,7 +46,7 @@
 	$app_id = "5QUa5y0lcxNstWnw7onLUaBGHL2uIKW4YzTO2TEJ";
 	$rest_key = "hwkUY2rYjfzbeLOVChaBaN42dHF3lxJcnhEyLf9v";
 	$server = "https://parseapi.back4app.com";
-	$path = "parse";
+	$path = "/";
 
 	ParseClient::initialize($app_id, $rest_key, $master_key);  
 	ParseClient::setServerURL($server, $path);
