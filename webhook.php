@@ -31,6 +31,8 @@
  																		   
  ***************************************************************************/
 
+	require 'vendor/autoload.php';
+
 	$merchant_secret = 'sk_test_p7Aq1TW4oKqJD6zIodsWSoCW2fFOZoNlfNqJM0CuBbLe';  
 			
 	// Create and initialize variables to be sent to confirm the that the ongoing transaction is associated with the current merchant
@@ -99,79 +101,129 @@
 	fclose($myfile);
 
 /***** SAVE THIS IN YOUD DATABASE - end ****************/
-		
-		
-	
-//Authentication |We make sure that the received data come from a system that knows our secret key (WeCashUp only)
-	if($received_transaction_merchant_secret !=null && $received_transaction_merchant_secret == $merchant_secret){
-		//received_transaction_merchant_secret is Valid
-		
-		echo '<br><br> merchant_secret [MATCH]'; 
-		
-		//Now check if you have a transaction with the received_transaction_uid and received_transaction_token
-		
-		$database_transaction_uid = 'TEST_UID';//************* LOAD FROM YOUR DATABASE ****************
-		$database_transaction_token = 'TEST_TOKEN';//************* LOAD FROM YOUR DATABASE ****************
-		
-		if($received_transaction_uid != null && $received_transaction_uid == $database_transaction_uid){
-			//received_transaction_merchant_secret is Valid
-			
-			echo '<br><br> transaction_uid [MATCH]'; 
-			
-			if($received_transaction_token  != null && $received_transaction_token == $database_transaction_token){
-				//received_transaction_token is Valid 
-				
-				echo '<br><br> transaction_token [MATCH]'; 
-				
-				//All the 3 parameters match, so...
-				$authenticated = 'true';
-			}
-		}
-	}
 
-	echo '<br><br>authenticated : '.$authenticated;
-	
-	if($authenticated == 'true'){
+// GET TRANSACTION FROM PARSE DB 
+
+	use Parse\ParseObject;
+	use Parse\ParseQuery;
+	use Parse\ParseACL;
+	use Parse\ParsePush;
+	use Parse\ParseUser;
+	use Parse\ParseInstallation;
+	use Parse\ParseException;
+	use Parse\ParseFile;
+	use Parse\ParseClient;
+	use Parse\ParseGeoPoint;
+
+	$master_key = "yPc6M834wK7qwaJsMHY8lTx97RhNX2kZeIxhfm4W";
+	$app_id = "5QUa5y0lcxNstWnw7onLUaBGHL2uIKW4YzTO2TEJ";
+	$rest_key = "hwkUY2rYjfzbeLOVChaBaN42dHF3lxJcnhEyLf9v";
+	$server = "https://parseapi.back4app.com";
+	$path = "/";
+
+	ParseClient::initialize($app_id, $rest_key, $master_key);  
+	ParseClient::setServerURL($server, $path);
+
+	try {
+		$query = new ParseQuery("Payment");
+		$query->equalTo("transaction_uid", $received_transaction_uid);
+		$results = $query->find();
+
+		error_log("Successfully retrieved " . count($results) . " Payments from Parse.");
+		echo "Successfully retrieved " . count($results) . " Payments.";
+
+		$database_transaction_uid = '';//************* LOAD FROM YOUR DATABASE ****************
+		$database_transaction_token = '';//************* LOAD FROM YOUR DATABASE ****************
 		
-		//Update and process your transaction
-		
-		if($received_transaction_status =="PAID"){
-			//Save the transaction status in your database and do whatever you want to tell the user that it's transaction succeed
-			echo '<br><br> transaction_status : '.$transaction_status;
-			
-		}else{ //Status = FAILED
-			
-			//Save the transaction status in your database and do whatever you want to tell the user that it's transaction failed
-			echo '<br><br> transaction_status : '.$transaction_status;
+		// Do something with the returned ParseObject values
+		for ($i = 0; $i < count($results); $i++) {
+		  $object = $results[$i];
+
+		  $database_transaction_uid = $object->get('transaction_uid');
+		  $database_transaction_token = $object->get('transaction_token');
+
+		  echo $object->getObjectId() . ' - ' . $object->get('transaction_uid');
+		  error_log("Successfully retrieved payment with transaction_uid" . $object->get('transaction_uid') . " from Parse.");
 		}
-		
-/***** SAVE THIS IN YOUD DATABASE - start ****************/
-		
-	$file = 'transactions.txt';
-	$txt = "received_transaction_merchant_secret : ".$received_transaction_merchant_secret."\n".
-			"received_transaction_uid : ".$received_transaction_uid."\n".
-			"received_transaction_token : ".$received_transaction_token."\n".
-			"received_transaction_details : ".$received_transaction_details."\n".
-			"received_transaction_status : ".$received_transaction_status."\n".
-			"received_transaction_type : ".$received_transaction_type."\n";
-	
-	$myfile = fopen("newfile.txt", "w") or die("Unable to open file!");
-	fwrite($myfile, $txt);
-	fclose($myfile);
-/***** SAVE THIS IN YOUD DATABASE - end ****************/
-		
+
+		//Authentication |We make sure that the received data come from a system that knows our secret key (WeCashUp only)
+			if($received_transaction_merchant_secret !=null && $received_transaction_merchant_secret == $merchant_secret){
+				//received_transaction_merchant_secret is Valid
+				
+				echo '<br><br> merchant_secret [MATCH]'; 
+				
+				//Now check if you have a transaction with the received_transaction_uid and received_transaction_token
+				
+				// $database_transaction_uid = 'TEST_UID';//************* LOAD FROM YOUR DATABASE ****************
+				// $database_transaction_token = 'TEST_TOKEN';//************* LOAD FROM YOUR DATABASE ****************
+				
+				if($received_transaction_uid != null && $received_transaction_uid == $database_transaction_uid){
+					//received_transaction_merchant_secret is Valid
+					
+					echo '<br><br> transaction_uid [MATCH]'; 
+					
+					if($received_transaction_token  != null && $received_transaction_token == $database_transaction_token){
+						//received_transaction_token is Valid 
+						
+						echo '<br><br> transaction_token [MATCH]'; 
+						
+						//All the 3 parameters match, so...
+						$authenticated = 'true';
+					}
+				}
+			}
+
+			echo '<br><br>authenticated : '.$authenticated;
+			
+			if($authenticated == 'true'){
+				
+				//Update and process your transaction
+				
+				if($received_transaction_status =="PAID"){
+					//Save the transaction status in your database and do whatever you want to tell the user that it's transaction succeed
+					echo '<br><br> transaction_status : '.$transaction_status;
+					error_log('WECASHUP transaction_status: ' .$transaction_status);
+					
+				}else{ //Status = FAILED
+					
+					//Save the transaction status in your database and do whatever you want to tell the user that it's transaction failed
+					echo '<br><br> transaction_status : '.$transaction_status;
+					error_log('WECASHUP transaction_status: ' .$transaction_status);
+				}
+				
+		/***** SAVE THIS IN YOUD DATABASE - start ****************/
+				
+			$file = 'transactions.txt';
+			$txt = "received_transaction_merchant_secret : ".$received_transaction_merchant_secret."\n".
+					"received_transaction_uid : ".$received_transaction_uid."\n".
+					"received_transaction_token : ".$received_transaction_token."\n".
+					"received_transaction_details : ".$received_transaction_details."\n".
+					"received_transaction_status : ".$received_transaction_status."\n".
+					"received_transaction_type : ".$received_transaction_type."\n";
+			
+			$myfile = fopen("newfile.txt", "w") or die("Unable to open file!");
+			fwrite($myfile, $txt);
+			fclose($myfile);
+		/***** SAVE THIS IN YOUD DATABASE - end ****************/
+				
+				/*
+					NOTE : 	You can analyze each variable in order to process further operations like sending 
+							an email to the customer to inform him that his transaction failed or launching the 
+							delivery process if the transaction succeed.
+				*/ 
+				
+			}
+			
+		/* If the one of the 3 parameters above doesn't match, this default webhook script will ignore the request. 
+		   You can also save them in your logs if you want to keep track of everything that happens here.
+		   
+		   If you are here it means that you are done with the WeCashUp's integration, we wish you to make lot of money and become billionaire.
+		   If so ma broda ma sista, please don't forget to buy me a beer *_*.
 		/*
-			NOTE : 	You can analyze each variable in order to process further operations like sending 
-					an email to the customer to inform him that his transaction failed or launching the 
-					delivery process if the transaction succeed.
-		*/ 
-		
+
+
+	} catch (\Exception $e){
+		echo $e->getMessage();
 	}
-	
-/* If the one of the 3 parameters above doesn't match, this default webhook script will ignore the request. 
-   You can also save them in your logs if you want to keep track of everything that happens here.
-   
-   If you are here it means that you are done with the WeCashUp's integration, we wish you to make lot of money and become billionaire.
-   If so ma broda ma sista, please don't forget to buy me a beer *_*.
-/*
+		
 ?>
