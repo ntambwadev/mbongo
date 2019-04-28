@@ -59,7 +59,7 @@
 	$payment->set("transaction_provider_name", $transaction_provider_name);
 	$payment->set("transaction_confirmation_code", $transaction_confirmation_code);
 	$payment->set("transaction_uid", $transaction_uid);
-	$payment->set("transaction_status", $transaction_status);
+	$payment->set("transaction_status", "PENDING");
 	$payment->set("transaction_token", $transaction_token);
 	
 
