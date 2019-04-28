@@ -67,10 +67,12 @@
 	  file_put_contents("php://stderr", "Trying saving PAYMENT in PARSE \n");
 	  $payment->save();
 	  echo 'New object created with objectId: ' . $payment->getObjectId();
+	  file_put_contents("php://stderr", 'New object created with objectId: ' . $payment->getObjectId().' \n');
 	} catch (ParseException $ex) {  
 	  // Execute any logic that should take place if the save fails.
 	  // error is a ParseException object with an error code and message.
 	  echo 'Failed to create new object, with error message: ' . $ex->getMessage();
+	  error_log('Failed to create new object, with error message:' . $ex->getMessage());
 	}
 
 	
