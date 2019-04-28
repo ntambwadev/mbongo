@@ -29,6 +29,46 @@
 	/* Provide a table with at least 5 columns in your database capturing the following
 	/  transaction_uid | transaction_confirmation_code| transaction_token| transaction_provider_name | transaction_status */
 	
+	use Parse\ParseQuery;
+	use Parse\ParseACL;
+	use Parse\ParsePush;
+	use Parse\ParseUser;
+	use Parse\ParseInstallation;
+	use Parse\ParseException;
+	use Parse\ParseFile;
+	use Parse\ParseClient;
+	use Parse\ParseGeoPoint;
+
+	$master_key = "yPc6M834wK7qwaJsMHY8lTx97RhNX2kZeIxhfm4W";
+	$app_id = "5QUa5y0lcxNstWnw7onLUaBGHL2uIKW4YzTO2TEJ";
+	$rest_key = "hwkUY2rYjfzbeLOVChaBaN42dHF3lxJcnhEyLf9v";
+	$server = "https://parseapi.back4app.io"
+	$path = "/"
+
+	ParseClient::initialize($app_id, $rest_key, $master_key);  
+	ParseClient::setServerURL($server, $path);
+
+	// example query
+
+	$payment = new ParseObject("Payment");
+
+	$payment->set("name", .$merchant_uid);
+	$payment->set("transaction_provider_name", .$transaction_provider_name);
+	$payment->set("transaction_confirmation_code", .$transaction_confirmation_code);
+	$payment->set("transaction_uid", .$transaction_uid);
+	$payment->set("transaction_status", .$transaction_status);
+	$payment->set("transaction_token", .$transaction_token);
+	
+
+	try {
+	  $payment->save();
+	  echo 'New object created with objectId: ' . $payment->getObjectId();
+	} catch (ParseException $ex) {  
+	  // Execute any logic that should take place if the save fails.
+	  // error is a ParseException object with an error code and message.
+	  echo 'Failed to create new object, with error message: ' . $ex->getMessage();
+	}
+
 	
 	//Step 8 : Sending data to the WeCashUp Server
 	

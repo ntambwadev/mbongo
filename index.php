@@ -2,7 +2,7 @@
 
 require('vendor/autoload.php');
 
-echo "Hello AFRICA!"
+<?php include_once("index.html"); ?>
 
 ?>
 
