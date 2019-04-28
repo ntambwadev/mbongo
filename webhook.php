@@ -185,13 +185,13 @@
 			if($received_transaction_status =="PAID"){
 				//Save the transaction status in your database and do whatever you want to tell the user that it's transaction succeed
 				echo '<br><br> transaction_status : '.$transaction_status;
-				error_log('MBONGO: WECASHUP transaction_status: ' .$transaction_status);
+				error_log('MBONGO: WECASHUP transaction_status: ' . $transaction_status);
 				
 			}else{ //Status = FAILED
 				
 				//Save the transaction status in your database and do whatever you want to tell the user that it's transaction failed
 				echo '<br><br> transaction_status : '.$transaction_status;
-				error_log('MBONGO: WECASHUP transaction_status: ' .$transaction_status);
+				error_log('MBONGO: WECASHUP transaction_status: ' . $transaction_status);
 			}
 			
 			/***** SAVE THIS IN YOUD DATABASE - start ****************/
