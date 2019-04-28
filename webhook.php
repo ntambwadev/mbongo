@@ -103,33 +103,33 @@
 
 /***** SAVE THIS IN YOUD DATABASE - end ****************/
 
-// GET TRANSACTION FROM PARSE DB 
+	// GET TRANSACTION FROM PARSE DB 
+
+	// Setup Parse server
+
+	use Parse\ParseObject;
+	use Parse\ParseQuery;
+	use Parse\ParseACL;
+	use Parse\ParsePush;
+	use Parse\ParseUser;
+	use Parse\ParseInstallation;
+	use Parse\ParseException;
+	use Parse\ParseFile;
+	use Parse\ParseClient;
+	use Parse\ParseGeoPoint;
+
+	$master_key = "yPc6M834wK7qwaJsMHY8lTx97RhNX2kZeIxhfm4W";
+	$app_id = "5QUa5y0lcxNstWnw7onLUaBGHL2uIKW4YzTO2TEJ";
+	$rest_key = "hwkUY2rYjfzbeLOVChaBaN42dHF3lxJcnhEyLf9v";
+	$server = "https://parseapi.back4app.com";
+	$path = "/";
+
+	ParseClient::initialize($app_id, $rest_key, $master_key);  
+	ParseClient::setServerURL($server, $path);
 
 	try {
 		file_put_contents("php://stderr", "MBGONGO: Trying fetch PAYMENT in PARSE with transaction_uid: " . $received_transaction_uid." \n");
 
-		// Setup Parse server
-
-		use Parse\ParseObject;
-		use Parse\ParseQuery;
-		use Parse\ParseACL;
-		use Parse\ParsePush;
-		use Parse\ParseUser;
-		use Parse\ParseInstallation;
-		use Parse\ParseException;
-		use Parse\ParseFile;
-		use Parse\ParseClient;
-		use Parse\ParseGeoPoint;
-
-		$master_key = "yPc6M834wK7qwaJsMHY8lTx97RhNX2kZeIxhfm4W";
-		$app_id = "5QUa5y0lcxNstWnw7onLUaBGHL2uIKW4YzTO2TEJ";
-		$rest_key = "hwkUY2rYjfzbeLOVChaBaN42dHF3lxJcnhEyLf9v";
-		$server = "https://parseapi.back4app.com";
-		$path = "/";
-
-		ParseClient::initialize($app_id, $rest_key, $master_key);  
-		ParseClient::setServerURL($server, $path);
-	
 		$query = new ParseQuery("Payment");
 		$query->equalTo("transaction_uid", $received_transaction_uid);
 		$results = $query->find();
