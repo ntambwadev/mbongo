@@ -55,15 +55,16 @@
 
 	$payment = new ParseObject("Payment");
 
-	$payment->set("name", $merchant_uid);
-	$payment->set("transaction_provider_name", $transaction_provider_name);
-	$payment->set("transaction_confirmation_code", $transaction_confirmation_code);
-	$payment->set("transaction_uid", $transaction_uid);
-	$payment->set("transaction_status", $transaction_status);
-	$payment->set("transaction_token", $transaction_token);
+	$payment->set("name", "WECASHUP");
+	// $payment->set("transaction_provider_name", $transaction_provider_name);
+	// $payment->set("transaction_confirmation_code", $transaction_confirmation_code);
+	// $payment->set("transaction_uid", $transaction_uid);
+	// $payment->set("transaction_status", $transaction_status);
+	// $payment->set("transaction_token", $transaction_token);
 	
 
 	try {
+	  file_put_contents("php://stderr", "Trying saving PAYMENT in PARSE \n");
 	  $payment->save();
 	  echo 'New object created with objectId: ' . $payment->getObjectId();
 	} catch (ParseException $ex) {  
