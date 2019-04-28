@@ -139,19 +139,35 @@
 
 		$database_transaction_uid = '';//************* LOAD FROM YOUR DATABASE ****************
 		$database_transaction_token = '';//************* LOAD FROM YOUR DATABASE ****************
-		$payment = new ParseObject("Payment");
 
 		// Do something with the returned ParseObject values
 		for ($i = 0; $i < count($results); $i++) {
-		  $object = $results[$i];
+			$payment = $results[$i];
 
-		  $database_transaction_uid = $object->get('transaction_uid');
-		  $database_transaction_token = $object->get('transaction_token');
+			$database_transaction_uid = $payment->get('transaction_uid');
+			$database_transaction_token = $payment->get('transaction_token');
 
-		  $payment = $object;
+			echo $payment->getObjectId() . ' - ' . $payment->get('transaction_uid');
+			error_log("MBONGO: Successfully retrieved payment with transaction_uid: " . $payment->get('transaction_uid') . " from Parse.");
 
-		  echo $object->getObjectId() . ' - ' . $object->get('transaction_uid');
-		  error_log("MBONGO: Successfully retrieved payment with transaction_uid: " . $object->get('transaction_uid') . " from Parse.");
+			// Update transaction in Parse with Status
+			$payment->set("transaction_status", $received_transaction_status);
+			$payment->set("transaction_amount", $received_transaction_amount);
+			$payment->set("transaction_details", $received_transaction_details);
+			$payment->set("transaction_type", $received_transaction_type);
+
+
+			try {
+				file_put_contents("php://stderr", "MBGONGO: Trying to Update PAYMENT in PARSE \n");
+				$payment->save();
+				echo 'New object created with objectId: ' . $payment->getObjectId();
+				file_put_contents("php://stderr", "MBGONGO: Payment with objectId: " . $payment->getObjectId()." was updated \n");
+			} catch (ParseException $ex) {  
+				// Execute any logic that should take place if the save fails.
+				// error is a ParseException object with an error code and message.
+				echo 'Failed to create new Payment, with error message: ' . $ex->getMessage();
+				error_log('MBGONGO: Failed to create update payment, with error message:' . $ex->getMessage());
+			}
 		}
 
 		//Authentication |We make sure that the received data come from a system that knows our secret key (WeCashUp only)
@@ -213,26 +229,6 @@
 			$myfile = fopen("newfile.txt", "w") or die("Unable to open file!");
 			fwrite($myfile, $txt);
 			fclose($myfile);
-
-
-			// Update transaction in Parse with Status
-			$payment->set("transaction_status", $received_transaction_status);
-			$payment->set("transaction_amount", $received_transaction_amount);
-			$payment->set("transaction_details", $received_transaction_details);
-			$payment->set("transaction_type", $received_transaction_type);
-			
-
-			try {
-			  file_put_contents("php://stderr", "MBGONGO: Trying to Update PAYMENT in PARSE \n");
-			  $payment->save();
-			  echo 'New object created with objectId: ' . $payment->getObjectId();
-			  file_put_contents("php://stderr", "MBGONGO: Payment with objectId: " . $payment->getObjectId()." was updated \n");
-			} catch (ParseException $ex) {  
-			  // Execute any logic that should take place if the save fails.
-			  // error is a ParseException object with an error code and message.
-			  echo 'Failed to create new Payment, with error message: ' . $ex->getMessage();
-			  error_log('MBGONGO: Failed to create update payment, with error message:' . $ex->getMessage());
-			}
 
 			/***** SAVE THIS IN YOUD DATABASE - end ****************/
 				
