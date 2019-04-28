@@ -128,7 +128,7 @@
 		file_put_contents("php://stderr", "MBGONGO: Trying fetch PAYMENT in PARSE with transaction_uid: " . $received_transaction_uid." \n");
 
 		$query = new ParseQuery("Payment");
-		$query->equalTo("transaction_uid", $received_transaction_uid);
+		// $query->equalTo("transaction_uid", $received_transaction_uid);
 		$results = $query->find();
 		
 		echo "Successfully retrieved " . count($results) . " Payments.";
